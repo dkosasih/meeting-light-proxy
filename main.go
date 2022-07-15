@@ -1,17 +1,16 @@
 package main
 
 import (
-	handlers "github.com/dkosasih/meeting-light-proxy/handlers"
-
+	"github.com/dkosasih/meeting-light-proxy/albums"
+	"github.com/dkosasih/meeting-light-proxy/openhab"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	router := gin.Default()
-	router.GET("/albums", handlers.GetAlbums)
-	router.GET("/albums/:id", handlers.GetAlbumByID)
-	router.POST("/albums", handlers.PostAlbums)
-	router.POST("/openhab/command", handlers.UpdateOpenHab)
 
-	router.RunTLS("localhost:443", "./static/devcerts/loclhost.crt", "./static/devcerts/localhost.key")
+	albums.RegisterEndpoints(router)
+	openhab.RegisterEndpoints(router)
+
+	router.RunTLS(":443", "./static/devcerts/loclhost.crt", "./static/devcerts/localhost.key")
 }
