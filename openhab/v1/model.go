@@ -1,4 +1,4 @@
-package openhab
+package v1
 
 type MeetingStatus struct {
 	Input struct {

@@ -1,4 +1,4 @@
-package albums
+package v2
 
 type Album struct {
 	ID     string  `json:"id"`
