@@ -51,12 +51,17 @@ func Test_createHandler(t *testing.T) {
 		c *gin.Context
 	}
 	tests := []struct {
-		name    string
-		version string
-		args    args
-		want    OpenhabHandlerInterface
+		name                string
+		version             string
+		shouldVersionExists bool
+		args                args
+		want                OpenhabHandlerInterface
 	}{
-		{"should create v1 handler when context is v1", "2", args{c}, &v1.OpenhabHandler{}},
+		{"should create v1 handler when context version is v1", "1", true, args{c}, &v1.OpenhabHandler{}},
+		{"should create v1 handler when context version is v2", "2", true, args{c}, &v1.OpenhabHandler{}},
+		{"should create v2 as default handler when context version is not v1 or v2", "5", true, args{c}, &v1.OpenhabHandler{}},
+		{"should create v2 as default handler when context version is not v1 or v2", "", true, args{c}, &v1.OpenhabHandler{}},
+		{"should create v2 as default handler when context version not exists", "", false, args{c}, &v1.OpenhabHandler{}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
