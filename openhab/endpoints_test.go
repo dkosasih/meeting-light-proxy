@@ -1,74 +1,70 @@
 package openhab
 
 import (
-	"reflect"
+	"net/http/httptest"
 	"testing"
 
-	"net/http/httptest"
-
-	v1 "github.com/dkosasih/meeting-light-proxy/openhab/v1"
 	"github.com/gin-gonic/gin"
 )
 
+type HandlerMock struct {
+}
+
+func (hm *HandlerMock) UpdateOpenHab(c *gin.Context) {
+	c.Set("UpdateOpenHabCalled", true)
+}
+
+type HandlerFactoryMock struct {
+}
+
+func (hmf *HandlerFactoryMock) CreateHandler(*gin.Context) OpenhabHandlerInterface {
+	var hm OpenhabHandlerInterface = &HandlerMock{}
+
+	return hm
+}
+
 func TestRegisterEndpoints(t *testing.T) {
 	type args struct {
-		r *gin.Engine
+		creator OpenhabHandlerCreator
 	}
 	tests := []struct {
-		name string
-		args args
+		name        string
+		xpectLength int
+		args        args
 	}{
-		// TODO: Add test cases.
+		{"Should create 1 endpoint when register endpoint is called", 1, args{creator: &HandlerFactoryMock{}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			RegisterEndpoints(tt.args.r)
+			r := gin.Default()
+			RegisterEndpoints(r, tt.args.creator)
+
+			if len(r.Routes()) != tt.xpectLength {
+				t.Errorf("Expect only one endpoint being created")
+			}
 		})
 	}
 }
 
 func Test_updateOpenHab(t *testing.T) {
 	type args struct {
-		c *gin.Context
+		creator OpenhabHandlerCreator
 	}
 	tests := []struct {
 		name string
 		args args
+		want func(*gin.Context)
 	}{
-		// TODO: Add test cases.
+		{"Should call UpdateOpenHab func in Handler", args{creator: &HandlerFactoryMock{}}, func(*gin.Context) {}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			updateOpenHab(tt.args.c)
-		})
-	}
-}
+			c, _ := gin.CreateTestContext(httptest.NewRecorder())
+			got := updateOpenHab(tt.args.creator)
+			got(c)
 
-func Test_createHandler(t *testing.T) {
-	c, _ := gin.CreateTestContext(httptest.NewRecorder())
-
-	type args struct {
-		c *gin.Context
-	}
-	tests := []struct {
-		name                string
-		version             string
-		shouldVersionExists bool
-		args                args
-		want                OpenhabHandlerInterface
-	}{
-		{"should create v1 handler when context version is v1", "1", true, args{c}, &v1.OpenhabHandler{}},
-		{"should create v1 handler when context version is v2", "2", true, args{c}, &v1.OpenhabHandler{}},
-		{"should create v2 as default handler when context version is not v1 or v2", "5", true, args{c}, &v1.OpenhabHandler{}},
-		{"should create v2 as default handler when context version is not v1 or v2", "", true, args{c}, &v1.OpenhabHandler{}},
-		{"should create v2 as default handler when context version not exists", "", false, args{c}, &v1.OpenhabHandler{}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c.Set("version", tt.version)
-			got := createHandler(tt.args.c)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("createHandler() = %v, want %v", got, tt.want)
+			if v, e := c.Get("UpdateOpenHabCalled"); v == "" && !e {
+				t.Errorf("Expect UpdateOpenHab() from versioned handler to be called")
 			}
 		})
 	}

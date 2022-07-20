@@ -11,8 +11,8 @@ func ApiVersion() gin.HandlerFunc {
 			requestedApiVersion = header
 		}
 
-		if requestedApiVersion == "1" || requestedApiVersion == "1.0" {
-			c.Set("version", "1")
+		if requestedApiVersion != "" {
+			c.Set("version", requestedApiVersion)
 		}
 		c.Next()
 	}

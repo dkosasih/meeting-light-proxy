@@ -12,8 +12,15 @@ func main() {
 
 	router.Use(middleware.ApiVersion())
 
-	albums.RegisterEndpoints(router)
-	openhab.RegisterEndpoints(router)
+	registerServices(router)
 
 	router.RunTLS(":443", "./static/devcerts/loclhost.crt", "./static/devcerts/localhost.key")
+}
+
+func registerServices(router *gin.Engine) {
+	var openHabFactory openhab.OpenhabHandlerCreator = &openhab.OpenhabHandlerFactory{}
+	var albumFactory albums.AlbumHandlerCreator = &albums.AlbumHandlerFactory{}
+
+	albums.RegisterEndpoints(router, albumFactory)
+	openhab.RegisterEndpoints(router, openHabFactory)
 }
