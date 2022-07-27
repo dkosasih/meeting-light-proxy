@@ -7,14 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type AlbumHandlerFactory struct {
+type albumHandlerFactory struct {
 }
 
 type AlbumHandlerCreator interface {
 	CreateHandler(*gin.Context) AlbumHandlerInterface
 }
 
-func (hf *AlbumHandlerFactory) CreateHandler(c *gin.Context) AlbumHandlerInterface {
+func NewAlbumHandlerFactory() *albumHandlerFactory {
+	return &albumHandlerFactory{}
+}
+
+func (hf *albumHandlerFactory) CreateHandler(c *gin.Context) AlbumHandlerInterface {
 	version := utils.GetVersionString(c)
 
 	var ohi AlbumHandlerInterface
@@ -23,10 +27,10 @@ func (hf *AlbumHandlerFactory) CreateHandler(c *gin.Context) AlbumHandlerInterfa
 	case "1":
 		// TODO: is there a better way to refactor this?
 		c.Writer.Header().Add("x-version", "1")
-		ohi = &v1.AlbumHandler{}
+		ohi = v1.NewAlbumHandler()
 	default:
 		c.Writer.Header().Add("x-version", "2")
-		ohi = &v2.AlbumHandler{}
+		ohi = v2.NewAlbumHandler()
 	}
 
 	return ohi

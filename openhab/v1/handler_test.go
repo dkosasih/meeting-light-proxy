@@ -82,9 +82,8 @@ func TestOpenhabHandler_UpdateOpenHab(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := &OpenhabHandler{
-				Client: tt.fields.Client,
-			}
+			h := NewOpenHabHandler(tt.fields.Client)
+
 			h.UpdateOpenHab(tt.args.c)
 
 			if tt.wantError == nil && tt.args.c.Errors != nil {
