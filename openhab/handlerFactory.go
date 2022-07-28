@@ -17,7 +17,7 @@ type OpenhabHandlerCreator interface {
 }
 
 func NewOpenhabHandlerFactory(client *http.Client) *openhabHandlerFactory {
-	return &openhabHandlerFactory{client}
+	return &openhabHandlerFactory{HttpClient: client}
 }
 
 func (hf *openhabHandlerFactory) CreateHandler(c *gin.Context) OpenhabHandlerInterface {

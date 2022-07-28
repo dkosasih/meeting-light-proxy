@@ -4,14 +4,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterEndpoints(r *gin.Engine, creator OpenhabHandlerCreator) {
-	routes := r.Group("/openhab")
-
-	routes.POST("/command", updateOpenHab(creator))
+type Endpoints struct {
+	r       *gin.Engine
+	creator OpenhabHandlerCreator
 }
 
-func updateOpenHab(creator OpenhabHandlerCreator) func(*gin.Context) {
+func NewEndpoints(r *gin.Engine, creator OpenhabHandlerCreator) *Endpoints {
+	return &Endpoints{r: r, creator: creator}
+}
+
+func (e *Endpoints) Register() {
+	routes := e.r.Group("/openhab")
+
+	routes.POST("/command", e.updateOpenHab())
+}
+
+func (e *Endpoints) updateOpenHab() func(*gin.Context) {
 	return func(c *gin.Context) {
-		creator.CreateHandler(c).UpdateOpenHab(c)
+		e.creator.CreateHandler(c).UpdateOpenHab(c)
 	}
 }

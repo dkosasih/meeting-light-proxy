@@ -37,7 +37,11 @@ func TestRegisterEndpoints(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := gin.Default()
-			RegisterEndpoints(r, tt.args.creator)
+			endpoint := &Endpoints{
+				r:       r,
+				creator: tt.args.creator,
+			}
+			endpoint.Register()
 
 			if len(r.Routes()) != tt.xpectLength {
 				t.Errorf("Expect only one endpoint being created")
@@ -59,8 +63,13 @@ func Test_updateOpenHab(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			r := gin.Default()
 			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			got := updateOpenHab(tt.args.creator)
+			endpoints := &Endpoints{
+				r:       r,
+				creator: tt.args.creator,
+			}
+			got := endpoints.updateOpenHab()
 			got(c)
 
 			if v, e := c.Get("UpdateOpenHabCalled"); v == "" && !e {

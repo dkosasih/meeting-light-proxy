@@ -4,28 +4,37 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterEndpoints(r *gin.Engine, creator AlbumHandlerCreator) {
-	routes := r.Group("/albums")
-
-	routes.GET("/", getAlbums(creator))
-	routes.GET("/:id", getAlbumByID(creator))
-	routes.POST("/", postAlbums(creator))
+type Endpoints struct {
+	r       *gin.Engine
+	creator AlbumHandlerCreator
 }
 
-func getAlbums(creator AlbumHandlerCreator) func(*gin.Context) {
+func NewEndpoints(r *gin.Engine, creator AlbumHandlerCreator) *Endpoints {
+	return &Endpoints{r: r, creator: creator}
+}
+
+func (e *Endpoints) Register() {
+	routes := e.r.Group("/albums")
+
+	routes.GET("/", e.getAlbums())
+	routes.GET("/:id", e.getAlbumByID())
+	routes.POST("/", e.postAlbums())
+}
+
+func (e *Endpoints) getAlbums() func(*gin.Context) {
 	return func(c *gin.Context) {
-		creator.CreateHandler(c).GetAlbums(c)
+		e.creator.CreateHandler(c).GetAlbums(c)
 	}
 }
 
-func getAlbumByID(creator AlbumHandlerCreator) func(c *gin.Context) {
+func (e *Endpoints) getAlbumByID() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		creator.CreateHandler(c).GetAlbumByID(c)
+		e.creator.CreateHandler(c).GetAlbumByID(c)
 	}
 }
 
-func postAlbums(creator AlbumHandlerCreator) func(c *gin.Context) {
+func (e *Endpoints) postAlbums() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		creator.CreateHandler(c).PostAlbums(c)
+		e.creator.CreateHandler(c).PostAlbums(c)
 	}
 }
