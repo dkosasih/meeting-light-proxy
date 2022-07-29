@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 type HandlerMock struct {
@@ -24,6 +25,8 @@ func (hmf *HandlerFactoryMock) CreateHandler(*gin.Context) OpenhabHandlerInterfa
 }
 
 func TestRegisterEndpoints(t *testing.T) {
+	assert := assert.New(t)
+
 	type args struct {
 		creator OpenhabHandlerCreator
 	}
@@ -43,14 +46,14 @@ func TestRegisterEndpoints(t *testing.T) {
 			}
 			endpoint.Register()
 
-			if len(r.Routes()) != tt.xpectLength {
-				t.Errorf("Expect only one endpoint being created")
-			}
+			assert.Equal(len(r.Routes()), tt.xpectLength, "Expect only one endpoint being created")
 		})
 	}
 }
 
 func Test_updateOpenHab(t *testing.T) {
+	assert := assert.New(t)
+
 	type args struct {
 		creator OpenhabHandlerCreator
 	}
@@ -72,6 +75,9 @@ func Test_updateOpenHab(t *testing.T) {
 			got := endpoints.updateOpenHab()
 			got(c)
 
+			v, e := c.Get("UpdateOpenHabCalled")
+			assert.False(e)
+			assert.NotEmpty(v)
 			if v, e := c.Get("UpdateOpenHabCalled"); v == "" && !e {
 				t.Errorf("Expect UpdateOpenHab() from versioned handler to be called")
 			}
