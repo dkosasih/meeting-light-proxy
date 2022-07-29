@@ -75,12 +75,10 @@ func Test_updateOpenHab(t *testing.T) {
 			got := endpoints.updateOpenHab()
 			got(c)
 
-			v, e := c.Get("UpdateOpenHabCalled")
-			assert.False(e)
-			assert.NotEmpty(v)
-			if v, e := c.Get("UpdateOpenHabCalled"); v == "" && !e {
-				t.Errorf("Expect UpdateOpenHab() from versioned handler to be called")
-			}
+			value, exists := c.Get("UpdateOpenHabCalled")
+			assert.True(exists)
+			assert.NotEmpty(value)
+			assert.True(value.(bool))
 		})
 	}
 }

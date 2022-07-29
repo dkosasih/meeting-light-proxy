@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 type respondWithReader func(req *http.Request) (*http.Response, error)
@@ -47,6 +48,7 @@ func createGinContext(requestJsonPayload string) *gin.Context {
 }
 
 func TestOpenhabHandler_UpdateOpenHab(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		Client *http.Client
 	}
@@ -87,20 +89,21 @@ func TestOpenhabHandler_UpdateOpenHab(t *testing.T) {
 			h.UpdateOpenHab(tt.args.c)
 
 			if tt.wantError == nil && tt.args.c.Errors != nil {
-				t.Errorf("expect: %v; but got: %v", tt.wantError, tt.args.c.Errors[0])
+				assert.Failf(tt.name, "expect: %v; but got: %v", tt.wantError, tt.args.c.Errors[0])
 			}
 
 			if tt.wantError != nil &&
 				tt.args.c.Errors != nil &&
 				!strings.Contains(tt.args.c.Errors[len(tt.args.c.Errors)-1].Error(), tt.wantError.Error()) {
-				t.Errorf("expect: %v; but got: %v", tt.wantError, tt.args.c.Errors[0])
+				assert.Fail(tt.name, "expect: %v; but got: %v", tt.wantError, tt.args.c.Errors[0])
 			}
-
 		})
 	}
 }
 
 func Test_sendCommand(t *testing.T) {
+	assert := assert.New(t)
+
 	type args struct {
 		proxyModel *MeetingStatus
 		client     *http.Client
@@ -130,7 +133,7 @@ func Test_sendCommand(t *testing.T) {
 		},
 		{
 			name:    "should error when httpClient responded with non 200",
-			wantErr: fmt.Errorf(`Post "https://192.168.0.185:8443/rest/items/MeetingStatus": internal server error`),
+			wantErr: fmt.Errorf(`Post "/rest/items/MeetingStatus": internal server error`),
 			args: args{
 				proxyModel: &MeetingStatus{
 					Input: struct {
@@ -167,7 +170,7 @@ func Test_sendCommand(t *testing.T) {
 			err := <-tt.args.c
 
 			if err != tt.wantErr && err.Error() != tt.wantErr.Error() {
-				t.Errorf("expect error: %v; but got: %v", tt.wantErr, err)
+				assert.Failf("Error not match", "expect error: %v; but got: %v", tt.wantErr, err)
 			}
 		})
 	}
