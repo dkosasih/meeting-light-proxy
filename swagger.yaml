@@ -1,0 +1,57 @@
+basePath: /
+consumes:
+- application/json
+info:
+  description: OpenHAB proxy and sample api.
+  title: API of the openhab and sample.
+  version: 1.0.0
+paths:
+  /openhab/command:
+    post:
+      description: send meeting status to Openhab server
+      operationId: sendOpenHabCommand
+      parameters:
+      - example: '{"input": {"camera": "inactive", "microphone": "active"}}'
+        in: body
+        name: input
+        required: true
+        schema:
+          properties:
+            camera:
+              type: string
+              x-go-name: Camera
+            microphone:
+              type: string
+              x-go-name: Microphone
+          type: object
+        x-go-name: Input
+      - description: api version header; latest will be return if not specified
+        in: header
+        name: x-version
+        type: string
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/CommonError'
+      tags:
+      - openhab
+produces:
+- application/json
+responses:
+  CommonError:
+    description: ""
+    headers:
+      error:
+        description: |-
+          error message
+          in: string
+        type: string
+      success:
+        description: |-
+          success status
+          in: bool
+        type: boolean
+schemes:
+- https
+swagger: "2.0"

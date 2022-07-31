@@ -8,6 +8,4 @@ import (
 type App struct {
 	Router    *gin.Engine
 	Endpoints []interfaces.EndpointRegistrator
-	// OpenHabEndpoints interfaces.EndpointRegistrator
-	// AlbumEndpoints   interfaces.EndpointRegistrator
 }

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/dkosasih/meeting-light-proxy/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,10 +23,24 @@ func NewOpenHabHandler(httpClient *http.Client) *openhabHandler {
 	return &openhabHandler{httpClient}
 }
 
+// swagger:route POST /openhab/command openhab sendOpenHabCommand
+// send meeting status to Openhab server
+//
+// Parameters:
+// 	+ name: x-version
+//	  in: header
+//    description: api version header; latest will be return if not specified
+//    required: false
+//    type: string
+// responses:
+//  400: CommonError
+//  200:
+//		description: OK
 func (h *openhabHandler) UpdateOpenHab(c *gin.Context) {
 	var proxyModel *MeetingStatus
 	if err := c.BindJSON(&proxyModel); err != nil {
 		c.Error(fmt.Errorf("error parsing meeting status model: %v", err))
+		c.AbortWithStatusJSON(400, models.CommonError{Success: false, Error: fmt.Sprintf("error parsing meeting status model: %v", err)})
 		return
 	}
 	data, _ := json.Marshal(proxyModel)
@@ -40,6 +55,7 @@ func (h *openhabHandler) UpdateOpenHab(c *gin.Context) {
 
 	if err := <-chann; err != nil {
 		c.Error(fmt.Errorf("error making request to OpenHAB server: %v", err))
+		c.AbortWithStatusJSON(400, gin.H{"success": false, "error": fmt.Sprintf("error making request to OpenHAB server: %v", err)})
 		return
 	}
 }
